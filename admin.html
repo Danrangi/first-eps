@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EPS — Admin</title>
+  <link rel="stylesheet" href="css/main.css">
+  <script defer src="js/main.js"></script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h3 class="brand">Admin</h3>
+      <nav>
+        <a href="#manage-students" class="active">Manage Students</a>
+        <a href="#manage-questions">Manage Questions/Exams</a>
+        <a href="dashboard.html">Back to Dashboard</a>
+      </nav>
+    </aside>
+    <main class="content">
+      <header class="page-header">
+        <h1>Admin Panel</h1>
+      </header>
+
+      <section class="admin-tabs">
+        <div class="tablist">
+          <button class="tab active" data-target="students">Manage Students</button>
+          <button class="tab" data-target="questions">Manage Questions/Exams</button>
+        </div>
+
+        <div id="students" class="tab-content active">
+          <h3>Students</h3>
+          <p>List of students would appear here (mock view).</p>
+        </div>
+
+        <div id="questions" class="tab-content">
+          <h3>Questions / Exams</h3>
+          <p>Simple management UI for exam items (mock).</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
