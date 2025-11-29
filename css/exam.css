@@ -1,0 +1,21 @@
+/* Styles specific to the exam interface */
+.exam-layout{display:flex; gap:18px; padding:24px}
+.question-area{flex:1; background:var(--bg)}
+.nav-area{width:300px; background:var(--panel); padding:16px; border-radius:10px}
+.exam-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px}
+.question-card{background:#fff; padding:18px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.04)}
+.q-number{font-weight:600; color:var(--muted); margin-bottom:8px}
+.q-text{font-size:18px; margin-bottom:12px}
+.options-list{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px}
+.options-list li{background:#fff; border:1px solid #e7e7e7; padding:12px; border-radius:8px; display:flex; align-items:center; gap:12px}
+.options-list li .label{flex:1}
+.options-list li .check{width:22px; height:22px; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; color:#fff}
+.options-list li.selected{border-color:var(--accent-blue); box-shadow:0 4px 12px rgba(30,144,255,0.08)}
+.options-list li.selected .check{background:var(--accent-blue)}
+
+.q-nav-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:8px}
+.q-nav-grid button{padding:10px; border-radius:6px; border:1px solid #e3e3e3; background:#fff; cursor:pointer}
+.q-nav-grid button.answered{background:#dff6e8; border-color:rgba(46,139,87,0.2)} /* green for answered */
+.q-nav-grid button.current{outline:3px solid var(--accent-blue); transform:scale(1.04)} /* blue border for current */
+
+.exam-actions{display:flex; gap:8px; margin-top:14px}
