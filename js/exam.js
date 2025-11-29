@@ -1,79 +1,139 @@
-// exam.js — simple static exam interface behaviors
-document.addEventListener('DOMContentLoaded', ()=>{
-  const total = 12; // number of questions in mock
-  const qNav = document.getElementById('qNav')
-  const qIndexEl = document.getElementById('qIndex')
-  const qText = document.getElementById('qText')
-  const optionsList = document.getElementById('options')
-  const prevBtn = document.getElementById('prevBtn')
-  const nextBtn = document.getElementById('nextBtn')
+// Basic exam logic: show questions, mark answered, update nav sidebar
+const examData = JSON.parse(localStorage.getItem('eps_current_exam')||'null') || {examType:'JAMB',subjects:['Mathematics']}
+const questionBank = {
+  Mathematics:[
+    {q:'If 2x+3=11, x=?', opts:['2','4','5','7'], a:1},
+    {q:'Sqrt(144)=?', opts:['10','11','12','13'], a:2},
+    {q:'15% of 200 = ?', opts:['20','25','30','35'], a:2}
+  ],
+  English:[
+    {q:'Choose correct spelling', opts:['Accomodation','Accommodation','Acommodation','Acomodation'], a:1},
+    {q:'Synonym of happy', opts:['Sad','Joyful','Angry','Tired'], a:1}
+  ],
+  Physics:[{q:'SI unit of force?',opts:['Joule','Newton','Watt','Pascal'],a:1}],
+  Chemistry:[{q:'Symbol for Gold?',opts:['Go','Gd','Au','Ag'],a:2}]
+}
 
-  // simple question data
-  const questions = Array.from({length: total}).map((_,i)=>({
-    id: i+1,
-    text: `This is a sample question number ${i+1}. Choose the correct answer.`,
-    options: ["Option A","Option B","Option C","Option D"],
-    answer: null
-  }))
+let currentSubjectIndex = 0
+let currentQuestionIndex = 0
+const state = {answers:{}}
 
-  let current = 0
+function currentSubject(){return examData.subjects[currentSubjectIndex]}
 
-  function buildNav(){
-    qNav.innerHTML = ''
-    questions.forEach((q, idx)=>{
-      const btn = document.createElement('button')
-      btn.textContent = q.id
-      btn.dataset.index = idx
-      btn.addEventListener('click', ()=>{ goTo(idx) })
-      qNav.appendChild(btn)
-    })
-    refreshNav()
+function loadQuestion(){
+  const subject = currentSubject()
+  const list = questionBank[subject] || []
+  if(list.length===0) {
+    document.getElementById('qText').textContent = 'No questions for '+subject
+    return
   }
+  const q = list[currentQuestionIndex]
+  document.getElementById('examType').textContent = examData.examType
+  document.getElementById('subjectName').textContent = subject
+  document.getElementById('qNumber').textContent = `Q ${currentQuestionIndex+1}`
+  document.getElementById('qText').textContent = q.q
+  document.getElementById('progressInfo').textContent = `Question ${currentQuestionIndex+1} of ${list.length}`
 
-  function refreshNav(){
-    qNav.querySelectorAll('button').forEach(btn=>{
-      const idx = Number(btn.dataset.index)
-      btn.classList.toggle('answered', Boolean(questions[idx].answer))
-      btn.classList.toggle('current', idx===current)
-    })
-  }
+  const opts = document.getElementById('options')
+  opts.innerHTML = ''
+  q.opts.forEach((o,i)=>{
+    const div = document.createElement('div')
+    div.className='option'
+    div.dataset.index = i
+    const left = document.createElement('div')
+    left.textContent = `${String.fromCharCode(65+i)}. ${o}`
+    const right = document.createElement('div')
+    right.className='check'
+    right.style.display='none'
+    right.textContent='✓'
+    div.appendChild(left);div.appendChild(right)
+    div.addEventListener('click',()=>selectAnswer(i))
+    opts.appendChild(div)
+  })
 
-  function renderQuestion(){
-    const q = questions[current]
-    qIndexEl.textContent = q.id
-    qText.textContent = q.text
-    optionsList.innerHTML = ''
-    q.options.forEach((opt, i)=>{
-      const li = document.createElement('li')
-      li.className = q.answer===i? 'selected' : ''
-      const label = document.createElement('div')
-      label.className = 'label'
-      label.textContent = opt
-      const check = document.createElement('div')
-      check.className = 'check'
-      check.innerHTML = q.answer===i? '✔' : ''
-      li.appendChild(label)
-      li.appendChild(check)
-      li.addEventListener('click', ()=>{
-        q.answer = i
-        renderQuestion()
-        refreshNav()
-      })
-      optionsList.appendChild(li)
+  // highlight selected if exists
+  const key = `${subject}_${currentQuestionIndex}`
+  if(state.answers[key]!=null){
+    const sel = state.answers[key]
+    document.querySelectorAll('.option').forEach((el,ii)=>{
+      el.classList.toggle('selected',ii===sel)
+      el.querySelector('.check').style.display = ii===sel? 'inline-block':'none'
     })
   }
 
-  function goTo(i){
-    if(i<0) i=0
-    if(i>questions.length-1) i=questions.length-1
-    current = i
-    renderQuestion()
-    refreshNav()
-  }
+  updateNavGrid()
+}
 
-  prevBtn && prevBtn.addEventListener('click', ()=> goTo(current-1))
-  nextBtn && nextBtn.addEventListener('click', ()=> goTo(current+1))
+function selectAnswer(idx){
+  const subject = currentSubject()
+  const key = `${subject}_${currentQuestionIndex}`
+  state.answers[key]=idx
+  document.querySelectorAll('.option').forEach((el,ii)=>{
+    el.classList.toggle('selected',ii===idx)
+    el.querySelector('.check').style.display = ii===idx? 'inline-block':'none'
+  })
+  markAnsweredButton(currentQuestionIndex)
+}
 
-  buildNav()
-  goTo(0)
+document.getElementById('prevBtn').addEventListener('click',()=>{
+  if(currentQuestionIndex>0){currentQuestionIndex--;loadQuestion()}
 })
+document.getElementById('nextBtn').addEventListener('click',()=>{
+  const list = questionBank[currentSubject()]||[]
+  if(currentQuestionIndex < list.length-1){currentQuestionIndex++;loadQuestion();return}
+  // if last question of current subject and there are more subjects
+  if(currentSubjectIndex < examData.subjects.length-1){currentSubjectIndex++; currentQuestionIndex=0; loadQuestion();return}
+  // finished all -> compute results
+  computeAndSaveResults()
+})
+
+function computeAndSaveResults(){
+  let total=0,correct=0,wrong=0
+  examData.subjects.forEach(sub=>{
+    const list = questionBank[sub]||[]
+    list.forEach((q,i)=>{
+      total++
+      const key = `${sub}_${i}`
+      if(state.answers[key]==null) { wrong++ }
+      else if(state.answers[key]===q.a) correct++
+      else wrong++
+    })
+  })
+  const score = Math.round((correct/total)*100)
+  localStorage.setItem('eps_last_results', JSON.stringify({score,correct,wrong,total}))
+  location.href='results.html'
+}
+
+// nav grid
+function buildNavGrid(){
+  const grid = document.getElementById('navGrid')
+  grid.innerHTML=''
+  const list = questionBank[currentSubject()]||[]
+  for(let i=0;i<list.length;i++){
+    const b=document.createElement('button')
+    b.className='nav-btn'
+    b.textContent = i+1
+    b.dataset.index=i
+    b.addEventListener('click',()=>{currentQuestionIndex=i;loadQuestion()})
+    grid.appendChild(b)
+  }
+}
+
+function updateNavGrid(){
+  const grid = document.getElementById('navGrid')
+  if(!grid.childElementCount) buildNavGrid()
+  grid.querySelectorAll('.nav-btn').forEach((b,idx)=>{
+    b.classList.toggle('current', idx===currentQuestionIndex)
+    const key = `${currentSubject()}_${idx}`
+    b.classList.toggle('answered', state.answers[key]!=null)
+  })
+}
+
+function markAnsweredButton(idx){
+  const grid = document.getElementById('navGrid')
+  const btn = grid.querySelector(`.nav-btn[data-index='${idx}']`)
+  if(btn) btn.classList.add('answered')
+}
+
+// initialize
+buildNavGrid(); loadQuestion();

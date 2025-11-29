@@ -1,42 +1,46 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EPS — Dashboard</title>
   <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/dashboard.css">
-  <script defer src="js/main.js"></script>
+  <script defer src="js/dashboard.js"></script>
 </head>
 <body>
-  <div class="layout">
+  <div class="app">
     <aside class="sidebar">
-      <h3 class="brand">EPS</h3>
+      <div class="sidebar-top">EPS</div>
       <nav>
-        <a href="#profile">Profile</a>
-        <a href="#history">History</a>
-        <a href="admin.html">Admin Panel</a>
-        <a href="index.html" class="logout">Logout</a>
+        <a href="#">Profile</a>
+        <a href="#">History</a>
+        <a id="logout" href="#">Logout</a>
       </nav>
     </aside>
-    <main class="content">
-      <header class="page-header">
-        <h1>Exams Dashboard</h1>
+
+    <main class="main-area">
+      <header class="main-header">
+        <h2>Welcome, <span id="userName">Student</span></h2>
       </header>
 
-      <section class="exam-cards">
-        <a class="exam-card" href="exam.html?exam=jamb">
-          <h2>JAMB</h2>
-          <p>Practice JAMB past questions</p>
-        </a>
-        <a class="exam-card" href="exam.html?exam=waec">
-          <h2>WAEC</h2>
-          <p>Practice WAEC past questions</p>
-        </a>
-        <a class="exam-card" href="exam.html?exam=neco">
-          <h2>NECO</h2>
-          <p>Practice NECO past questions</p>
-        </a>
+      <section class="cards">
+        <div class="exam-card" data-exam="jamb">
+          <h3>JAMB</h3>
+          <p>Multi-subject exam</p>
+          <button class="start">Start</button>
+        </div>
+
+        <div class="exam-card" data-exam="waec">
+          <h3>WAEC</h3>
+          <p>Select subject</p>
+          <button class="start">Start</button>
+        </div>
+
+        <div class="exam-card" data-exam="neco">
+          <h3>NECO</h3>
+          <p>Select subject</p>
+          <button class="start">Start</button>
+        </div>
       </section>
     </main>
   </div>

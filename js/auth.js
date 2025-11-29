@@ -1,26 +1,30 @@
-// auth.js — handles simple tab switching and mock submission
-document.addEventListener('DOMContentLoaded', ()=>{
-  // Tab switching for login/signup (elements with data-target)
-  const tabs = document.querySelectorAll('.tabs [data-target], .admin-tabs .tablist [data-target]');
-  tabs.forEach(tab => tab.addEventListener('click', (e)=>{
-    const group = tab.closest('.tabs') || tab.closest('.tablist') || document;
-    // deactivate siblings
-    group.querySelectorAll('[data-target]').forEach(b => b.classList.remove('active'));
-    tab.classList.add('active');
-    // switch content
-    const targetId = tab.dataset.target;
-    if(targetId){
-      // hide other tab-content within same container (if any)
-      const container = document.querySelectorAll(`#${targetId}`)[0]?.closest ? document.getElementById(targetId).parentElement : document.body;
-      document.querySelectorAll(`#${targetId}`).forEach(el=>el.classList.add('active'));
-      document.querySelectorAll('.tab-content').forEach(c=>{ if(c.id !== targetId) c.classList.remove('active') })
-    }
-  }));
+// Tabs
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'))
+  document.querySelectorAll('.form').forEach(f=>f.classList.remove('active'))
+  btn.classList.add('active')
+  document.getElementById(btn.dataset.tab).classList.add('active')
+}))
 
-  // Mock form submissions — redirect to dashboard
-  const loginForm = document.getElementById('loginForm');
-  const signupForm = document.getElementById('signupForm');
-  if(loginForm) loginForm.addEventListener('submit', (e)=>{ e.preventDefault(); window.location.href='dashboard.html' });
-  if(signupForm) signupForm.addEventListener('submit', (e)=>{ e.preventDefault(); window.location.href='dashboard.html' });
+// Signup (store basic user locally for demo)
+document.getElementById('signup').addEventListener('submit',e=>{
+  e.preventDefault()
+  const u=document.getElementById('signup-username').value
+  const em=document.getElementById('signup-email').value
+  const r=document.getElementById('signup-role').value
+  // store small user record
+  localStorage.setItem('eps_user',JSON.stringify({username:u,email:em,role:r}))
+  alert('Account created — now login')
+  document.querySelector('[data-tab="login"]').click()
+})
 
-});
+// Login
+document.getElementById('login').addEventListener('submit',e=>{
+  e.preventDefault()
+  const u=document.getElementById('login-username').value
+  const r=document.getElementById('login-role').value
+  // store minimal user session
+  localStorage.setItem('eps_user',JSON.stringify({username:u,role:r}))
+  if(r==='admin') location.href='admin.html'
+  else location.href='dashboard.html'
+})
